@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
+  <title>🎲 Premium Ludo | Ultra</title>
+  <style>
+    :root {
+      --bg: #050510;
+      --card: rgba(18, 18, 35, 0.85);
+      --gold: #ffd700;
+      --red: #ff3b3b;
+      --green: #00e676;
+      --blue: #448aff;
+      --cyan: #00e5ff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      height: 100vh; height: 100dvh;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Segoe UI', 'Poppins', sans-serif;
+      background: var(--bg);
+      overflow-y: auto; user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse at 30% 20%, rgba(68,138,255,0.06) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(255,59,59,0.06) 0%, transparent 50%);
+    }
+    .grid-dots {
+      position: fixed; inset: 0; z-index: 0; opacity: 0.3;
+      background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+
+    .container {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 600px;
+      display: flex; flex-direction: column;
+      padding: 10px; gap: 8px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center; padding: 4px 0;
+      font-size: 1.5rem; font-weight: 800; letter-spacing: 2px;
+      background: linear-gradient(135deg, var(--gold), #ff9800, var(--gold), #ff6d00, var(--gold));
+      background-size: 300% 300%;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    /* Players Bar */
+    .players {
+      display: flex; gap: 10px; align-items: center;
+      background: var(--card); backdrop-filter: blur(30px);
+      border-radius: 20px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);
+    }
+    .player-mini {
+      flex: 1; text-align: center; padding: 8px; border-radius: 14px;
+      transition: all 0.4s;
+    }
+    .player-mini.active {
+      background: rgba(255,215,0,0.08); transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255,215,0,0.1);
+    }
+    .player-mini .dot {
+      width: 32px; height: 32px; border-radius: 50%; margin: 0 auto 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.85rem; color: #fff;
+    }
+    .dot.blue { background: var(--blue); box-shadow: 0 0 18px rgba(68,138,255,0.6); }
+    .dot.red { background: var(--red); box-shadow: 0 0 18px rgba(255,59,59,0.6); }
+    .player-mini .name { color: #888; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; }
+    .player-mini .pos { color: #fff; font-weight: 700; font-size: 0.95rem; margin-top: 2px; }
+    .vs {
+      color: #444; font-weight: 700; font-size: 0.8rem;
+      background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 20px;
+    }
+
+    /* Ludo Board */
+    .board-container {
+      background: var(--card); backdrop-filter: blur(30px);
+      border-radius: 20px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);
+    }
+    .ludo-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 5px; width: 100%; max-width: 340px; margin: 0 auto;
+    }
+    .ludo-cell {
+      aspect-ratio: 1; border-radius: 10px;
+      background: rgba(255,255,255,0.02);
+      border: 1.5px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; color: #555; font-weight: 600;
+      transition: all 0.3s; position: relative;
+    }
+    .ludo-cell.home {
+      background: rgba(255,215,0,0.1); border-color: rgba(255,215,0,0.3);
+      font-size: 1.3rem; color: var(--gold); font-weight: 800;
+    }
+    .ludo-cell .token {
+      width: 24px; height: 24px; border-radius: 50%; position: absolute;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 800; color: #fff; z-index: 2;
+    }
+    .token.blue-t { background: var(--blue); box-shadow: 0 0 12px rgba(68,138,255,0.6); top: 2px; left: 2px; }
+    .token.red-t { background: var(--red); box-shadow: 0 0 12px rgba(255,59,59,0.6); bottom: 2px; right: 2px; }
+
+    /* Dice */
+    .dice-section { text-align: center; padding: 4px 0; }
+    .dice-box {
+      display: inline-block; padding: 18px 30px;
+      background: var(--card); border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer; transition: all 0.3s;
+    }
+    .dice-box:hover { border-color: var(--gold); box-shadow: 0 0 30px rgba(255,215,0,0.25); }
+    .dice-box:active { transform: scale(0.93); }
+    .dice-box.rolling { animation: shake 0.5s ease-in-out; }
+    @keyframes shake {
+      0%,100% { transform: rotate(0); }
+      20% { transform: rotate(-20deg); }
+      40% { transform: rotate(20deg); }
+      60% { transform: rotate(-12deg); }
+      80% { transform: rotate(12deg); }
+    }
+    .dice-face { font-size: 3.2rem; transition: all 0.3s; }
+    .dice-label { color: #888; font-size: 0.7rem; margin-top: 4px; }
+    .dice-disabled { opacity: 0.4; pointer-events: none; }
+
+    /* Info Cards */
+    .info-row { display: flex; gap: 8px; }
+    .info-card {
+      flex: 1; text-align: center; padding: 12px;
+      background: var(--card); border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .info-card .l { color: #555; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; }
+    .info-card .v { color: #fff; font-weight: 700; font-size: 1.1rem; margin-top: 2px; }
+
+    /* Log */
+    .log-box {
+      background: var(--card); border-radius: 16px; padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.04); max-height: 110px; overflow-y: auto;
+    }
+    .log-item {
+      color: #777; font-size: 0.72rem; padding: 3px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; gap: 6px;
+    }
+    .log-item:last-child { border: none; }
+    .log-item.you { color: var(--cyan); }
+    .log-item.cpu { color: var(--red); }
+    .log-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .log-dot.you-dot { background: var(--cyan); }
+    .log-dot.cpu-dot { background: var(--red); }
+
+    /* Buttons */
+    .btn-row { display: flex; gap: 8px; }
+    .btn {
+      flex: 1; padding: 13px; border-radius: 14px;
+      border: 1.5px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03); color: #ccc;
+      font-weight: 600; font-size: 0.85rem; cursor: pointer;
+      transition: all 0.3s; font-family: inherit; text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    .btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); color: #fff; }
+    .btn.accent { background: rgba(68,138,255,0.15); border-color: rgba(68,138,255,0.4); color: var(--cyan); }
+    .btn.accent:hover { background: rgba(68,138,255,0.25); box-shadow: 0 0 20px rgba(68,138,255,0.2); }
+
+    /* Overlay */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: all 0.5s;
+    }
+    .overlay.show { opacity: 1; pointer-events: all; }
+    .result-card {
+      background: var(--card); backdrop-filter: blur(50px);
+      border-radius: 28px; padding: 28px; text-align: center;
+      border: 2px solid rgba(255,215,0,0.3);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.7); max-width: 330px; width: 90%;
+    }
+    .r-emoji { font-size: 4.5rem; animation: bounce 0.8s infinite; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-22px); } }
+    .r-title { font-size: 1.5rem; font-weight: 800; margin: 12px 0; }
+    .r-title.win { color: var(--green); }
+    .r-title.lose { color: var(--red); }
+    .r-sub { color: #999; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5; }
+    .r-btn {
+      padding: 13px 28px; border-radius: 25px; border: none;
+      font-weight: 700; font-size: 0.95rem; cursor: pointer;
+      transition: all 0.3s; font-family: inherit; margin: 4px;
+    }
+    .r-btn.pri { background: var(--gold); color: #000; box-shadow: 0 8px 25px rgba(255,215,0,0.4); }
+    .r-btn.pri:hover { transform: translateY(-3px); box-shadow: 0 12px 35px rgba(255,215,0,0.6); }
+    .r-btn.sec { background: transparent; border: 2px solid rgba(255,255,255,0.2); color: #fff; }
+    .r-btn.sec:hover { background: rgba(255,255,255,0.06); }
+
+    @media (max-width: 400px) {
+      .container { padding: 6px; gap: 5px; }
+      .ludo-grid { max-width: 280px; gap: 4px; }
+      .ludo-cell { font-size: 0.6rem; border-radius: 8px; }
+      .token { width: 20px; height: 20px; font-size: 0.55rem; }
+      .dice-face { font-size: 2.6rem; }
+      .dice-box { padding: 14px 24px; }
+      .header { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="grid-dots"></div>
+
+  <div class="container">
+    <div class="header">🎲 PREMIUM LUDO</div>
+
+    <!-- Players -->
+    <div class="players">
+      <div class="player-mini active" id="pYou">
+        <div class="dot blue">Y</div>
+        <div class="name">You</div>
+        <div class="pos">Cell: <span id="posYou">1</span></div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="player-mini" id="pCpu">
+        <div class="dot red">C</div>
+        <div class="name">CPU</div>
+        <div class="pos">Cell: <span id="posCpu">1</span></div>
+      </div>
+    </div>
+
+    <!-- Board -->
+    <div class="board-container">
+      <div class="ludo-grid" id="grid"></div>
+    </div>
+
+    <!-- Dice -->
+    <div class="dice-section">
+      <div class="dice-box" id="diceBox" onclick="rollDice()">
+        <div class="dice-face" id="diceFace">🎲</div>
+        <div class="dice-label" id="diceLabel">Tap or Space to Roll</div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="info-row">
+      <div class="info-card"><div class="l">Rolls</div><div class="v" id="rollCount">0</div></div>
+      <div class="info-card"><div class="l">Target</div><div class="v">🏠 25</div></div>
+      <div class="info-card"><div class="l">Leader</div><div class="v" id="winnerDisplay">-</div></div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-row">
+      <button class="btn accent" onclick="restart()">🔄 New Game</button>
+      <button class="btn" onclick="goToDashboard()">🏠 Back to Hub</button>
+    </div>
+
+    <!-- Log -->
+    <div class="log-box" id="logBox">
+      <div class="log-item"><span class="log-dot you-dot"></span>🎮 Game started! Roll the dice.</div>
+    </div>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay">
+    <div class="result-card">
+      <div class="r-emoji" id="rEmoji">🏆</div>
+      <div class="r-title win" id="rTitle">You Win!</div>
+      <div class="r-sub" id="rSub"></div>
+      <button class="r-btn pri" onclick="restart()">🔄 Play Again</button>
+      <button class="r-btn sec" onclick="document.getElementById('overlay').classList.remove('show')">✕ Close</button>
+    </div>
+  </div>
+
+  <script>
+    // ====== GAME STATE ======
+    const TOTAL = 25;
+    let youPos = 0, cpuPos = 0;
+    let yourTurn = true;
+    let gameOver = false;
+    let rollCount = 0;
+    let rolling = false;
+
+    // Ladders & Snakes
+    const ladders = { 4: 14, 9: 19, 13: 22 };
+    const snakes = { 16: 6, 20: 11, 7: 2 };
+
+    // Path order
+    const path = [0,1,2,3,4,9,8,7,6,5,10,11,12,13,14,19,18,17,16,15,20,21,22,23,24];
+
+    // ====== DOM ======
+    const grid = document.getElementById("grid");
+    const diceFace = document.getElementById("diceFace");
+    const diceLabel = document.getElementById("diceLabel");
+    const diceBox = document.getElementById("diceBox");
+    const posYouEl = document.getElementById("posYou");
+    const posCpuEl = document.getElementById("posCpu");
+    const rollCountEl = document.getElementById("rollCount");
+    const winnerDisplay = document.getElementById("winnerDisplay");
+    const logBox = document.getElementById("logBox");
+    const pYou = document.getElementById("pYou");
+    const pCpu = document.getElementById("pCpu");
+    const overlay = document.getElementById("overlay");
+    const diceEmojis = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+
+    // ====== SOUND ======
+    function playSound(type) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        if (type === 'roll') { o.frequency.value = 600; o.type = 'sine'; g.gain.value = 0.08; o.start(); o.stop(ctx.currentTime + 0.1); }
+        else if (type === 'ladder') { o.frequency.value = 400; o.type = 'triangle'; g.gain.value = 0.1; o.start(); o.frequency.linearRampToValueAtTime(900, ctx.currentTime + 0.3); o.stop(ctx.currentTime + 0.4); }
+        else if (type === 'snake') { o.frequency.value = 500; o.type = 'sawtooth'; g.gain.value = 0.06; o.start(); o.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.3); o.stop(ctx.currentTime + 0.4); }
+        else if (type === 'win') { o.frequency.value = 500; o.type = 'triangle'; g.gain.value = 0.12; o.start(); o.frequency.linearRampToValueAtTime(1200, ctx.currentTime + 0.5); o.stop(ctx.currentTime + 0.6); }
+        else if (type === 'lose') { o.frequency.value = 400; o.type = 'sawtooth'; g.gain.value = 0.08; o.start(); o.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.5); o.stop(ctx.currentTime + 0.6); }
+      } catch(e) {}
+    }
+
+    // ====== RENDER ======
+    function renderBoard() {
+      grid.innerHTML = "";
+      for (let i = 0; i < TOTAL; i++) {
+        const cell = document.createElement("div");
+        cell.className = "ludo-cell";
+        cell.textContent = path[i] + 1;
+
+        if (i === 0 || i === 24) { cell.classList.add("home"); cell.textContent = i === 0 ? "🏁" : "🏠"; }
+        if (ladders[i]) cell.style.background = "rgba(0,230,118,0.1)";
+        if (snakes[i]) cell.style.background = "rgba(255,59,59,0.1)";
+
+        if (i === youPos && i === cpuPos) {
+          cell.innerHTML = '<span class="token blue-t" style="top:2px;left:2px;">Y</span><span class="token red-t" style="bottom:2px;right:2px;">C</span>';
+        } else if (i === youPos) {
+          cell.innerHTML = '<span class="token blue-t">Y</span>';
+        } else if (i === cpuPos) {
+          cell.innerHTML = '<span class="token red-t">C</span>';
+        }
+        grid.appendChild(cell);
+      }
+      posYouEl.textContent = youPos + 1;
+      posCpuEl.textContent = cpuPos + 1;
+      pYou.classList.toggle("active", yourTurn && !gameOver);
+      pCpu.classList.toggle("active", !yourTurn && !gameOver);
+
+      // Leader
+      if (youPos > cpuPos) { winnerDisplay.textContent = "🔵 You"; winnerDisplay.style.color = "var(--cyan)"; }
+      else if (cpuPos > youPos) { winnerDisplay.textContent = "🔴 CPU"; winnerDisplay.style.color = "var(--red)"; }
+      else { winnerDisplay.textContent = "🤝 Tie"; winnerDisplay.style.color = "#888"; }
+    }
+
+    // ====== ROLL ======
+    function rollDice() {
+      if (!yourTurn || gameOver || rolling) return;
+      rolling = true;
+      diceBox.classList.add("rolling");
+      playSound('roll');
+
+      const dice = Math.floor(Math.random() * 6) + 1;
+      rollCount++;
+      rollCountEl.textContent = rollCount;
+
+      setTimeout(() => {
+        diceBox.classList.remove("rolling");
+        diceFace.textContent = diceEmojis[dice - 1];
+        diceLabel.textContent = `You rolled: ${dice}`;
+        addLog(`🎯 You rolled <b>${dice}</b>`, "you");
+        movePlayer("you", dice);
+        rolling = false;
+      }, 500);
+    }
+
+    // ====== MOVE ======
+    function movePlayer(who, steps) {
+      let pos = who === "you" ? youPos : cpuPos;
+      let newPos = pos + steps;
+
+      if (newPos >= TOTAL - 1) {
+        newPos = TOTAL - 1;
+        if (who === "you") youPos = newPos; else cpuPos = newPos;
+        renderBoard();
+        endGame(who);
+        return;
+      }
+
+      if (who === "you") youPos = newPos; else cpuPos = newPos;
+      const checkPos = who === "you" ? youPos : cpuPos;
+
+      if (ladders[checkPos]) {
+        renderBoard();
+        setTimeout(() => {
+          if (who === "you") youPos = ladders[checkPos]; else cpuPos = ladders[checkPos];
+          playSound('ladder');
+          addLog(`🪜 ${who === "you" ? "You" : "CPU"} climbed to <b>${ladders[checkPos] + 1}</b>!`, who);
+          renderBoard();
+          afterMove(who);
+        }, 600);
+        return;
+      }
+      if (snakes[checkPos]) {
+        renderBoard();
+        setTimeout(() => {
+          if (who === "you") youPos = snakes[checkPos]; else cpuPos = snakes[checkPos];
+          playSound('snake');
+          addLog(`🐍 ${who === "you" ? "You" : "CPU"} slid to <b>${snakes[checkPos] + 1}</b>!`, who);
+          renderBoard();
+          afterMove(who);
+        }, 600);
+        return;
+      }
+
+      renderBoard();
+      afterMove(who);
+    }
+
+    function afterMove(who) {
+      if (gameOver) return;
+      if (who === "you") {
+        yourTurn = false;
+        diceLabel.textContent = "CPU thinking...";
+        diceBox.classList.add("dice-disabled");
+        renderBoard();
+        setTimeout(cpuTurn, 1200);
+      } else {
+        yourTurn = true;
+        diceLabel.textContent = "Tap or Space to Roll";
+        diceBox.classList.remove("dice-disabled");
+        renderBoard();
+      }
+    }
+
+    // ====== CPU ======
+    function cpuTurn() {
+      if (gameOver) return;
+      const dice = Math.floor(Math.random() * 6) + 1;
+      rollCount++;
+      rollCountEl.textContent = rollCount;
+      diceFace.textContent = diceEmojis[dice - 1];
+      addLog(`🎯 CPU rolled <b>${dice}</b>`, "cpu");
+      movePlayer("cpu", dice);
+    }
+
+    // ====== END ======
+    function endGame(who) {
+      gameOver = true;
+      diceLabel.textContent = "Game Over";
+      diceBox.classList.add("dice-disabled");
+
+      if (who === "you") {
+        playSound('win');
+        winnerDisplay.textContent = "🏆 You!"; winnerDisplay.style.color = "var(--green)";
+        document.getElementById("rEmoji").textContent = "🏆";
+        document.getElementById("rTitle").textContent = "You Win! 🎉";
+        document.getElementById("rTitle").className = "r-title win";
+        document.getElementById("rSub").textContent = `🏠 Reached home in ${rollCount} rolls!`;
+      } else {
+        playSound('lose');
+        winnerDisplay.textContent = "😢 CPU"; winnerDisplay.style.color = "var(--red)";
+        document.getElementById("rEmoji").textContent = "😢";
+        document.getElementById("rTitle").textContent = "CPU Wins!";
+        document.getElementById("rTitle").className = "r-title lose";
+        document.getElementById("rSub").textContent = `CPU reached home in ${rollCount} rolls. Try again!`;
+      }
+      addLog(`🏁 <b>${who === "you" ? "You" : "CPU"} won!</b>`, who);
+      overlay.classList.add("show");
+    }
+
+    // ====== RESTART ======
+    function restart() {
+      youPos = 0; cpuPos = 0; yourTurn = true; gameOver = false;
+      rollCount = 0; rolling = false;
+      diceFace.textContent = "🎲"; diceLabel.textContent = "Tap or Space to Roll";
+      diceBox.classList.remove("dice-disabled");
+      rollCountEl.textContent = "0";
+      winnerDisplay.textContent = "-"; winnerDisplay.style.color = "#fff";
+      overlay.classList.remove("show");
+      logBox.innerHTML = '<div class="log-item"><span class="log-dot you-dot"></span>🎮 New game! Roll the dice.</div>';
+      renderBoard();
+    }
+
+    // ====== LOG ======
+    function addLog(msg, who) {
+      const div = document.createElement("div");
+      div.className = `log-item ${who}`;
+      div.innerHTML = `<span class="log-dot ${who}-dot"></span>${msg}`;
+      logBox.prepend(div);
+      if (logBox.children.length > 20) logBox.lastChild.remove();
+    }
+
+    // ====== KEYBOARD ======
+    document.addEventListener("keydown", e => {
+      if ((e.code === "Space" || e.key === " ") && yourTurn && !gameOver) { e.preventDefault(); rollDice(); }
+      if (e.key === "r" || e.key === "R") restart();
+    });
+
+    function goToDashboard() { window.location.href = 'index.html'; }
+
+    // ====== INIT ======
+    renderBoard();
+  </script>
+</body>
+</html>
