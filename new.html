@@ -10,51 +10,22 @@
         
         body {
             background: radial-gradient(circle at center, #1e1b4b, #0f172a);
-            display: flex; 
-            flex-direction: column;
-            justify-content: space-between; /* উপর-নিচের এলিমেন্টগুলোকে স্ক্রিনের প্রান্তে পুশ করবে */
-            align-items: center;
-            min-height: 100vh; 
-            overflow-x: hidden;
-            overflow-y: auto;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow: hidden;
             touch-action: manipulation;
-            padding: 40px 10px; /* টপ ও বটম প্যাডিং বাড়ানো হয়েছে */
-        }
-
-        /* ===== PREMIUM ANIMATED TITLE ===== */
-        .game-title {
-            font-size: clamp(24px, 4vmin, 42px);
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            background: linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444);
-            background-size: 300% 300%;
-            animation: glowText 8s ease infinite;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 40px; /* গেম বোর্ড থেকে টাইটেলকে আরও ওপরে ওঠানো হলো */
-            text-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
-            text-align: center;
-        }
-
-        @keyframes glowText {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
 
         /* ===== MODERN RESPONSIVE WRAPPER ===== */
         .game-wrapper {
             position: relative;
-            width: min(85vmin, 650px); /* ডেস্কটপে আরও পারফেক্ট ফিটের জন্য সাইজ সামঞ্জস্য করা হয়েছে */
-            height: min(85vmin, 650px);
+            width: min(94vmin, 720px);
+            height: min(94vmin, 720px);
             background: rgba(30, 41, 59, 0.7);
             border-radius: 24px;
             padding: 12px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.2);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.1);
-            margin: auto 0; /* গেম বোর্ডটিকে স্ক্রিনের একদম সেন্টারে রাখবে */
         }
 
         /* ===== THE LUDO BOARD (15x15) ===== */
@@ -108,9 +79,9 @@
             color: #64748b; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
-        /* ===== 3D DYNAMIC DICE SITE ===== */
+        /* ===== 3D DYNAMIC DICE SITE WITH FIXED 3D ASPECT ===== */
         :root {
-            --dice-size: min(10vmin, 70px);
+            --dice-size: min(11vmin, 75px);
             --dice-transform-z: calc(var(--dice-size) / 2);
         }
 
@@ -126,6 +97,7 @@
                         bottom 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
         
+        /* Smooth Shifting Position Engine Beside Panels */
         .dice-pos-0 { top: -2%; left: 27%; }    /* Green Side */
         .dice-pos-1 { top: -2%; right: 27%; }   /* Yellow Side */
         .dice-pos-2 { bottom: -2%; left: 27%; }  /* Red Side */
@@ -146,6 +118,7 @@
         }
         .dot { border-radius: 50%; background: #1e293b; width: 80%; height: 80%; margin: auto; box-shadow: inset 0 2px 3px rgba(0,0,0,0.4); }
         
+        /* Mathematical 3D Matrix Fixes using css variables */
         .face-1 { transform: rotateY(0deg) translateZ(var(--dice-transform-z)); }
         .face-6 { transform: rotateY(180deg) translateZ(var(--dice-transform-z)); }
         .face-2 { transform: rotateY(-90deg) translateZ(var(--dice-transform-z)); }
@@ -179,8 +152,8 @@
         
         .p-avatar { width: 36%; height: 85%; border-radius: 10px; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); }
         .p-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-        .p-name { font-weight: 700; font-size: clamp(12px, 1.6vmin, 16px); color: #f8fafc; }
-        .p-dice { font-size: clamp(16px, 2.5vmin, 24px); font-weight: bold; color: #94a3b8; }
+        .p-name { font-weight: 700; font-size: clamp(1.2vmin, 1.6vmin, 2.2vmin); color: #f8fafc; }
+        .p-dice { font-size: clamp(1.8vmin, 2.5vmin, 3.5vmin); font-weight: bold; color: #94a3b8; }
 
         .p-green { top: -5%; left: -1%; color: #10b981; }
         .p-yellow { top: -5%; right: -1%; color: #f59e0b; }
@@ -204,6 +177,7 @@
         .pawn-red { background: radial-gradient(circle at 35% 35%, #f87171, #b91c1c); border: 1.5px solid #7f1d1d; }
         .pawn-blue { background: radial-gradient(circle at 35% 35%, #60a5fa, #1d4ed8); border: 1.5px solid #1e3a8a; }
         
+        /* Floating Selectable Pawn Animation */
         .pawn-selected {
             animation: bounce 0.5s infinite alternate;
             box-shadow: 0 0 0 3px #fff, 0 10px 15px rgba(0,0,0,0.4);
@@ -218,64 +192,25 @@
         .status-toast {
             position: absolute; bottom: -11%; left: 50%; transform: translateX(-50%);
             background: rgba(15, 23, 42, 0.9); color: #f8fafc; padding: 10px 24px;
-            border-radius: 50px; font-size: clamp(12px, 1.8vmin, 16px);
+            border-radius: 50px; font-size: clamp(1.4vmin, 1.8vmin, 2.4vmin);
             white-space: nowrap; z-index: 80; backdrop-filter: blur(5px);
             border: 1px solid rgba(255,255,255,0.15);
             box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
             letter-spacing: 0.5px; font-weight: 500;
         }
 
-        /* ===== BACK TO HUB BUTTON (FIXED AT BOTTOM) ===== */
-        .hub-btn-container {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-top: 45px; /* গেম বোর্ড থেকে বাটনকে আরও নিচে নামানো হলো */
-            z-index: 200;
-        }
-        .hub-button {
-            padding: 12px 40px; 
-            border-radius: 30px; 
-            background: rgba(255, 255, 255, 0.07); 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15); 
-            color: #f8fafc; 
-            font-weight: 600; 
-            font-size: clamp(14px, 1.8vmin, 18px);
-            cursor: pointer; 
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
-            white-space: nowrap;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        .hub-button:hover {
-            background: rgba(255, 255, 255, 0.18);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        .hub-button:active {
-            transform: translateY(-1px);
-        }
-
         /* Mobile Optimization */
         @media (max-width: 600px) {
-            body { padding: 20px 10px; }
-            .game-title { margin-bottom: 25px; }
-            .game-wrapper { width: 94vmin; height: 94vmin; padding: 6px; border-radius: 16px; margin: 10px 0; }
+            .game-wrapper { width: 96vmin; height: 96vmin; padding: 6px; border-radius: 16px; }
             .player-panel { border-radius: 10px; }
             .dice-pos-0 { top: -2%; left: 27%; }
             .dice-pos-1 { top: -2%; right: 27%; }
             .dice-pos-2 { bottom: -2%; left: 27%; }
             .dice-pos-3 { bottom: -2%; right: 27%; }
-            .hub-btn-container { margin-top: 25px; }
         }
     </style>
 </head>
 <body>
-
-<!-- Premium Animated Title -->
-<h1 class="game-title">👑 Premium Ludo Pro 👑</h1>
 
 <div class="game-wrapper">
     <div class="player-panel p-green" id="panel-0">
@@ -317,11 +252,6 @@
     </div>
 
     <div class="status-toast" id="statusToast">✨ Premium Ludo Engine Ready!</div>
-</div>
-
-<!-- Back to Hub Button Area -->
-<div class="hub-btn-container">
-    <button class="hub-button" onclick="goToDashboard()">🏠 Back to Hub</button>
 </div>
 
 <script>
@@ -429,9 +359,11 @@
                 let coord = getCoords(p);
                 let r = coord[0], c = coord[1];
                 
+                // FIXED: Adding exactly 1/30 (3.333%) grid offset to center align the pawn perfectly inside 15x15 cell
                 let offsetTop = (r / 15 * 100) + 3.333;
                 let offsetLeft = (c / 15 * 100) + 3.333;
 
+                // Circular stacking offset calculation for multiple pawns in one block
                 if (total > 1) { 
                     let angle = (idx / total) * 2 * Math.PI;
                     offsetTop += Math.sin(angle) * 1.2;
@@ -494,7 +426,7 @@
 
         if(movablePawns.length === 0) {
             statusToast.innerText = `⚠️ No legal moves for ${activeColor.toUpperCase()}!`;
-            hasMoved = true; 
+            hasMoved = true; // FIXED: Release lock to let next roll trigger properly
             setTimeout(() => completeTurn(), 1400);
         } else {
             statusToast.innerText = `🎯 Select a ${activeColor.toUpperCase()} pawn to advance +${rolledValue}`;
@@ -534,11 +466,12 @@
                 statusToast.innerText = `🎉 Beautiful! Pawn Reached Goal!`;
             }
             
+            // FIXED: If rolled 6, grant another roll without changing player turn
             if(rolledValue === 6) {
-                hasMoved = true; 
+                hasMoved = true; // Allow clicking dice again
                 statusToast.innerText = `🎰 Bonus Roll Earned! Roll Again.`;
             } else {
-                hasMoved = true; 
+                hasMoved = true; // Release lock before going to next player
                 completeTurn();
             }
         }, 450);
@@ -564,14 +497,15 @@
 
     function completeTurn() {
         document.querySelectorAll('.player-panel').forEach(p => p.classList.remove('active'));
+        
         currentTurn = (currentTurn + 1) % 4;
+        
         document.getElementById(`panel-${currentTurn}`).classList.add('active');
+        
+        // Flying Dynamic Dice Box Alignment Trigger
         diceArea.className = `dice-area dice-pos-${currentTurn}`;
+        
         statusToast.innerText = `🎲 ${colors[currentTurn].toUpperCase()}'s turn. Click Dice.`;
-    }
-
-    function goToDashboard() {
-        window.location.href = 'login.html';
     }
 
     // Initialize Game

@@ -1,511 +1,582 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
-  <title>🎲 Premium Ludo | Ultra</title>
-  <style>
-    :root {
-      --bg: #050510;
-      --card: rgba(18, 18, 35, 0.85);
-      --gold: #ffd700;
-      --red: #ff3b3b;
-      --green: #00e676;
-      --blue: #448aff;
-      --cyan: #00e5ff;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium 3D Ludo Pro</title>
+    <style>
+        /* ===== PREMIUM THEME & RESET ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Segoe UI', sans-serif; }
+        
+        body {
+            background: radial-gradient(circle at center, #1e1b4b, #0f172a);
+            display: flex; 
+            flex-direction: column;
+            justify-content: space-between; /* উপর-নিচের এলিমেন্টগুলোকে স্ক্রিনের প্রান্তে পুশ করবে */
+            align-items: center;
+            min-height: 100vh; 
+            overflow-x: hidden;
+            overflow-y: auto;
+            touch-action: manipulation;
+            padding: 40px 10px; /* টপ ও বটম প্যাডিং বাড়ানো হয়েছে */
+        }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===== PREMIUM ANIMATED TITLE ===== */
+        .game-title {
+            font-size: clamp(24px, 4vmin, 42px);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444);
+            background-size: 300% 300%;
+            animation: glowText 8s ease infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px; /* গেম বোর্ড থেকে টাইটেলকে আরও ওপরে ওঠানো হলো */
+            text-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+            text-align: center;
+        }
 
-    body {
-      height: 100vh; height: 100dvh;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Segoe UI', 'Poppins', sans-serif;
-      background: var(--bg);
-      overflow-y: auto; user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
+        @keyframes glowText {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-    .bg {
-      position: fixed; inset: 0; z-index: 0;
-      background: radial-gradient(ellipse at 30% 20%, rgba(68,138,255,0.06) 0%, transparent 50%),
-                  radial-gradient(ellipse at 70% 80%, rgba(255,59,59,0.06) 0%, transparent 50%);
-    }
-    .grid-dots {
-      position: fixed; inset: 0; z-index: 0; opacity: 0.3;
-      background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
-      background-size: 30px 30px;
-    }
+        /* ===== MODERN RESPONSIVE WRAPPER ===== */
+        .game-wrapper {
+            position: relative;
+            width: min(85vmin, 650px); /* ডেস্কটপে আরও পারফেক্ট ফিটের জন্য সাইজ সামঞ্জস্য করা হয়েছে */
+            height: min(85vmin, 650px);
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 24px;
+            padding: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: auto 0; /* গেম বোর্ডটিকে স্ক্রিনের একদম সেন্টারে রাখবে */
+        }
 
-    .container {
-      position: relative; z-index: 1;
-      width: 100%; max-width: 600px;
-      display: flex; flex-direction: column;
-      padding: 10px; gap: 8px;
-    }
+        /* ===== THE LUDO BOARD (15x15) ===== */
+        .board-container {
+            position: relative; width: 100%; height: 100%;
+            display: grid; grid-template-columns: repeat(15, 1fr);
+            grid-template-rows: repeat(15, 1fr);
+            background: #ffffff; border-radius: 16px;
+            overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+        }
 
-    /* Header */
-    .header {
-      text-align: center; padding: 4px 0;
-      font-size: 1.5rem; font-weight: 800; letter-spacing: 2px;
-      background: linear-gradient(135deg, var(--gold), #ff9800, var(--gold), #ff6d00, var(--gold));
-      background-size: 300% 300%;
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      animation: shimmer 3s infinite;
-    }
-    @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        .cell {
+            background: #ffffff; position: relative;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+        }
 
-    /* Players Bar */
-    .players {
-      display: flex; gap: 10px; align-items: center;
-      background: var(--card); backdrop-filter: blur(30px);
-      border-radius: 20px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);
-    }
-    .player-mini {
-      flex: 1; text-align: center; padding: 8px; border-radius: 14px;
-      transition: all 0.4s;
-    }
-    .player-mini.active {
-      background: rgba(255,215,0,0.08); transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(255,215,0,0.1);
-    }
-    .player-mini .dot {
-      width: 32px; height: 32px; border-radius: 50%; margin: 0 auto 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 0.85rem; color: #fff;
-    }
-    .dot.blue { background: var(--blue); box-shadow: 0 0 18px rgba(68,138,255,0.6); }
-    .dot.red { background: var(--red); box-shadow: 0 0 18px rgba(255,59,59,0.6); }
-    .player-mini .name { color: #888; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; }
-    .player-mini .pos { color: #fff; font-weight: 700; font-size: 0.95rem; margin-top: 2px; }
-    .vs {
-      color: #444; font-weight: 700; font-size: 0.8rem;
-      background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 20px;
-    }
+        /* Premium Flat Colors */
+        .base-green { background: #10b981; }
+        .base-yellow { background: #f59e0b; }
+        .base-red { background: #ef4444; }
+        .base-blue { background: #3b82f6; }
 
-    /* Ludo Board */
-    .board-container {
-      background: var(--card); backdrop-filter: blur(30px);
-      border-radius: 20px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);
-    }
-    .ludo-grid {
-      display: grid; grid-template-columns: repeat(5, 1fr);
-      gap: 5px; width: 100%; max-width: 340px; margin: 0 auto;
-    }
-    .ludo-cell {
-      aspect-ratio: 1; border-radius: 10px;
-      background: rgba(255,255,255,0.02);
-      border: 1.5px solid rgba(255,255,255,0.06);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem; color: #555; font-weight: 600;
-      transition: all 0.3s; position: relative;
-    }
-    .ludo-cell.home {
-      background: rgba(255,215,0,0.1); border-color: rgba(255,215,0,0.3);
-      font-size: 1.3rem; color: var(--gold); font-weight: 800;
-    }
-    .ludo-cell .token {
-      width: 24px; height: 24px; border-radius: 50%; position: absolute;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.65rem; font-weight: 800; color: #fff; z-index: 2;
-    }
-    .token.blue-t { background: var(--blue); box-shadow: 0 0 12px rgba(68,138,255,0.6); top: 2px; left: 2px; }
-    .token.red-t { background: var(--red); box-shadow: 0 0 12px rgba(255,59,59,0.6); bottom: 2px; right: 2px; }
+        .path-green { background: #a7f3d0; }
+        .path-yellow { background: #fde68a; }
+        .path-red { background: #fca5a5; }
+        .path-blue { background: #bfdbfe; }
+        .path-white { background: #f8fafc; }
 
-    /* Dice */
-    .dice-section { text-align: center; padding: 4px 0; }
-    .dice-box {
-      display: inline-block; padding: 18px 30px;
-      background: var(--card); border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.08);
-      cursor: pointer; transition: all 0.3s;
-    }
-    .dice-box:hover { border-color: var(--gold); box-shadow: 0 0 30px rgba(255,215,0,0.25); }
-    .dice-box:active { transform: scale(0.93); }
-    .dice-box.rolling { animation: shake 0.5s ease-in-out; }
-    @keyframes shake {
-      0%,100% { transform: rotate(0); }
-      20% { transform: rotate(-20deg); }
-      40% { transform: rotate(20deg); }
-      60% { transform: rotate(-12deg); }
-      80% { transform: rotate(12deg); }
-    }
-    .dice-face { font-size: 3.2rem; transition: all 0.3s; }
-    .dice-label { color: #888; font-size: 0.7rem; margin-top: 4px; }
-    .dice-disabled { opacity: 0.4; pointer-events: none; }
+        /* Inner Base Cards */
+        .inner-base {
+            position: absolute; inset: 12%; background: rgba(255, 255, 255, 0.85);
+            border-radius: 12px; display: grid; grid-template: 1fr 1fr / 1fr 1fr;
+            padding: 8%; gap: 10%; box-shadow: inset 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .spot {
+            background: currentColor; border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15), inset 0 2px 4px rgba(255,255,255,0.4);
+        }
 
-    /* Info Cards */
-    .info-row { display: flex; gap: 8px; }
-    .info-card {
-      flex: 1; text-align: center; padding: 12px;
-      background: var(--card); border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.04);
-    }
-    .info-card .l { color: #555; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; }
-    .info-card .v { color: #fff; font-weight: 700; font-size: 1.1rem; margin-top: 2px; }
+        /* Center Triangle Home */
+        .center-cross { background: #fff; position: relative; }
+        .center-cross::before {
+            content: ''; position: absolute; inset: 0;
+            background: conic-gradient(from 45deg, #f59e0b 0deg 90deg, #ef4444 90deg 180deg, #3b82f6 180deg 270deg, #10b981 270deg 360deg);
+        }
 
-    /* Log */
-    .log-box {
-      background: var(--card); border-radius: 16px; padding: 10px 14px;
-      border: 1px solid rgba(255,255,255,0.04); max-height: 110px; overflow-y: auto;
-    }
-    .log-item {
-      color: #777; font-size: 0.72rem; padding: 3px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; gap: 6px;
-    }
-    .log-item:last-child { border: none; }
-    .log-item.you { color: var(--cyan); }
-    .log-item.cpu { color: var(--red); }
-    .log-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .log-dot.you-dot { background: var(--cyan); }
-    .log-dot.cpu-dot { background: var(--red); }
+        /* Star / Safe Marks */
+        .star::after {
+            content: '✦'; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); font-size: 3.5vmin;
+            color: #64748b; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
 
-    /* Buttons */
-    .btn-row { display: flex; gap: 8px; }
-    .btn {
-      flex: 1; padding: 13px; border-radius: 14px;
-      border: 1.5px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.03); color: #ccc;
-      font-weight: 600; font-size: 0.85rem; cursor: pointer;
-      transition: all 0.3s; font-family: inherit; text-align: center;
-      backdrop-filter: blur(10px);
-    }
-    .btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); color: #fff; }
-    .btn.accent { background: rgba(68,138,255,0.15); border-color: rgba(68,138,255,0.4); color: var(--cyan); }
-    .btn.accent:hover { background: rgba(68,138,255,0.25); box-shadow: 0 0 20px rgba(68,138,255,0.2); }
+        /* ===== 3D DYNAMIC DICE SITE ===== */
+        :root {
+            --dice-size: min(10vmin, 70px);
+            --dice-transform-z: calc(var(--dice-size) / 2);
+        }
 
-    /* Overlay */
-    .overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: all 0.5s;
-    }
-    .overlay.show { opacity: 1; pointer-events: all; }
-    .result-card {
-      background: var(--card); backdrop-filter: blur(50px);
-      border-radius: 28px; padding: 28px; text-align: center;
-      border: 2px solid rgba(255,215,0,0.3);
-      box-shadow: 0 30px 80px rgba(0,0,0,0.7); max-width: 330px; width: 90%;
-    }
-    .r-emoji { font-size: 4.5rem; animation: bounce 0.8s infinite; }
-    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-22px); } }
-    .r-title { font-size: 1.5rem; font-weight: 800; margin: 12px 0; }
-    .r-title.win { color: var(--green); }
-    .r-title.lose { color: var(--red); }
-    .r-sub { color: #999; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5; }
-    .r-btn {
-      padding: 13px 28px; border-radius: 25px; border: none;
-      font-weight: 700; font-size: 0.95rem; cursor: pointer;
-      transition: all 0.3s; font-family: inherit; margin: 4px;
-    }
-    .r-btn.pri { background: var(--gold); color: #000; box-shadow: 0 8px 25px rgba(255,215,0,0.4); }
-    .r-btn.pri:hover { transform: translateY(-3px); box-shadow: 0 12px 35px rgba(255,215,0,0.6); }
-    .r-btn.sec { background: transparent; border: 2px solid rgba(255,255,255,0.2); color: #fff; }
-    .r-btn.sec:hover { background: rgba(255,255,255,0.06); }
+        .dice-area {
+            position: absolute;
+            width: var(--dice-size);
+            height: var(--dice-size);
+            perspective: 1000px; 
+            z-index: 100;
+            transition: top 0.6s cubic-bezier(0.25, 1, 0.5, 1), 
+                        left 0.6s cubic-bezier(0.25, 1, 0.5, 1), 
+                        right 0.6s cubic-bezier(0.25, 1, 0.5, 1), 
+                        bottom 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        
+        .dice-pos-0 { top: -2%; left: 27%; }    /* Green Side */
+        .dice-pos-1 { top: -2%; right: 27%; }   /* Yellow Side */
+        .dice-pos-2 { bottom: -2%; left: 27%; }  /* Red Side */
+        .dice-pos-3 { bottom: -2%; right: 27%; } /* Blue Side */
 
-    @media (max-width: 400px) {
-      .container { padding: 6px; gap: 5px; }
-      .ludo-grid { max-width: 280px; gap: 4px; }
-      .ludo-cell { font-size: 0.6rem; border-radius: 8px; }
-      .token { width: 20px; height: 20px; font-size: 0.55rem; }
-      .dice-face { font-size: 2.6rem; }
-      .dice-box { padding: 14px 24px; }
-      .header { font-size: 1.2rem; }
-    }
-  </style>
+        .dice-cube {
+            width: 100%; height: 100%; position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            cursor: pointer;
+        }
+        .face {
+            position: absolute; width: 100%; height: 100%;
+            background: linear-gradient(145deg, #ffffff, #e2e8f0);
+            border: 2px solid #cbd5e1; border-radius: 12px; 
+            display: grid; padding: 15%; box-shadow: inset 0 0 12px rgba(0,0,0,0.15);
+            backface-visibility: hidden;
+        }
+        .dot { border-radius: 50%; background: #1e293b; width: 80%; height: 80%; margin: auto; box-shadow: inset 0 2px 3px rgba(0,0,0,0.4); }
+        
+        .face-1 { transform: rotateY(0deg) translateZ(var(--dice-transform-z)); }
+        .face-6 { transform: rotateY(180deg) translateZ(var(--dice-transform-z)); }
+        .face-2 { transform: rotateY(-90deg) translateZ(var(--dice-transform-z)); }
+        .face-5 { transform: rotateY(90deg) translateZ(var(--dice-transform-z)); }
+        .face-3 { transform: rotateX(90deg) translateZ(var(--dice-transform-z)); }
+        .face-4 { transform: rotateX(-90deg) translateZ(var(--dice-transform-z)); }
+
+        .d1 { grid-template: 1fr / 1fr; } .d1 .dot { background: #ef4444; width: 35%; height: 35%; }
+        .d2 { grid-template: 1fr 1fr / 1fr 1fr; }
+        .d3 { grid-template: 1fr 1fr 1fr / 1fr 1fr 1fr; }
+        .d3 .dot:nth-child(1) { grid-area: 1/1; } .d3 .dot:nth-child(2) { grid-area: 2/2; } .d3 .dot:nth-child(3) { grid-area: 3/3; }
+        .d4 { grid-template: 1fr 1fr / 1fr 1fr; }
+        .d5 { grid-template: 1fr 1fr 1fr / 1fr 1fr 1fr; }
+        .d5 .dot:nth-child(1) { grid-area: 1/1; } .d5 .dot:nth-child(2) { grid-area: 1/3; } .d5 .dot:nth-child(3) { grid-area: 2/2; } .d5 .dot:nth-child(4) { grid-area: 3/1; } .d5 .dot:nth-child(5) { grid-area: 3/3; }
+        .d6 { grid-template: repeat(3, 1fr) / 1fr 1fr; }
+
+        /* ===== PLAYER INFO PANELS ===== */
+        .player-panel {
+            position: absolute; width: 25%; height: 11%;
+            background: rgba(255, 255, 255, 0.12); border-radius: 16px;
+            display: flex; align-items: center; padding: 6px; gap: 8px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2); backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1); z-index: 30; transition: all 0.4s;
+        }
+        .player-panel.active {
+            background: rgba(255, 255, 255, 0.95);
+            transform: scale(1.08); box-shadow: 0 0 25px currentColor;
+        }
+        .player-panel.active .p-name { color: #0f172a; }
+        .player-panel.active .p-dice { color: #334155; }
+        
+        .p-avatar { width: 36%; height: 85%; border-radius: 10px; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); }
+        .p-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+        .p-name { font-weight: 700; font-size: clamp(12px, 1.6vmin, 16px); color: #f8fafc; }
+        .p-dice { font-size: clamp(16px, 2.5vmin, 24px); font-weight: bold; color: #94a3b8; }
+
+        .p-green { top: -5%; left: -1%; color: #10b981; }
+        .p-yellow { top: -5%; right: -1%; color: #f59e0b; }
+        .p-red { bottom: -5%; left: -1%; color: #ef4444; }
+        .p-blue { bottom: -5%; right: -1%; color: #3b82f6; }
+
+        /* ===== PREMIUM PAWNS ===== */
+        .pawn-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .pawn {
+            position: absolute; width: 5.2%; height: 5.2%;
+            border-radius: 50%; transform: translate(-50%, -50%);
+            z-index: 50; pointer-events: auto; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 -2px 4px rgba(0,0,0,0.3);
+        }
+        .pawn::before {
+            content: ''; position: absolute; inset: 18%; background: rgba(255,255,255,0.35); border-radius: 50%;
+        }
+        .pawn-green { background: radial-gradient(circle at 35% 35%, #34d399, #047857); border: 1.5px solid #064e3b; }
+        .pawn-yellow { background: radial-gradient(circle at 35% 35%, #fbbf24, #b45309); border: 1.5px solid #78350f; }
+        .pawn-red { background: radial-gradient(circle at 35% 35%, #f87171, #b91c1c); border: 1.5px solid #7f1d1d; }
+        .pawn-blue { background: radial-gradient(circle at 35% 35%, #60a5fa, #1d4ed8); border: 1.5px solid #1e3a8a; }
+        
+        .pawn-selected {
+            animation: bounce 0.5s infinite alternate;
+            box-shadow: 0 0 0 3px #fff, 0 10px 15px rgba(0,0,0,0.4);
+            z-index: 60;
+        }
+        @keyframes bounce {
+            from { transform: translate(-50%, -50%) scale(1.25); }
+            to { transform: translate(-50%, -80%) scale(1.25); }
+        }
+
+        /* ===== INTERACTIVE UI TOAST ===== */
+        .status-toast {
+            position: absolute; bottom: -11%; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.9); color: #f8fafc; padding: 10px 24px;
+            border-radius: 50px; font-size: clamp(12px, 1.8vmin, 16px);
+            white-space: nowrap; z-index: 80; backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            letter-spacing: 0.5px; font-weight: 500;
+        }
+
+        /* ===== BACK TO HUB BUTTON (FIXED AT BOTTOM) ===== */
+        .hub-btn-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 45px; /* গেম বোর্ড থেকে বাটনকে আরও নিচে নামানো হলো */
+            z-index: 200;
+        }
+        .hub-button {
+            padding: 12px 40px; 
+            border-radius: 30px; 
+            background: rgba(255, 255, 255, 0.07); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            color: #f8fafc; 
+            font-weight: 600; 
+            font-size: clamp(14px, 1.8vmin, 18px);
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
+            white-space: nowrap;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .hub-button:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .hub-button:active {
+            transform: translateY(-1px);
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 600px) {
+            body { padding: 20px 10px; }
+            .game-title { margin-bottom: 25px; }
+            .game-wrapper { width: 94vmin; height: 94vmin; padding: 6px; border-radius: 16px; margin: 10px 0; }
+            .player-panel { border-radius: 10px; }
+            .dice-pos-0 { top: -2%; left: 27%; }
+            .dice-pos-1 { top: -2%; right: 27%; }
+            .dice-pos-2 { bottom: -2%; left: 27%; }
+            .dice-pos-3 { bottom: -2%; right: 27%; }
+            .hub-btn-container { margin-top: 25px; }
+        }
+    </style>
 </head>
 <body>
-  <div class="bg"></div>
-  <div class="grid-dots"></div>
 
-  <div class="container">
-    <div class="header">🎲 PREMIUM LUDO</div>
+<!-- Premium Animated Title -->
+<h1 class="game-title">👑 Premium Ludo Pro 👑</h1>
 
-    <!-- Players -->
-    <div class="players">
-      <div class="player-mini active" id="pYou">
-        <div class="dot blue">Y</div>
-        <div class="name">You</div>
-        <div class="pos">Cell: <span id="posYou">1</span></div>
-      </div>
-      <div class="vs">VS</div>
-      <div class="player-mini" id="pCpu">
-        <div class="dot red">C</div>
-        <div class="name">CPU</div>
-        <div class="pos">Cell: <span id="posCpu">1</span></div>
-      </div>
+<div class="game-wrapper">
+    <div class="player-panel p-green" id="panel-0">
+        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Sophia" class="p-avatar">
+        <div class="p-info"><span class="p-name">Sophia</span><span class="p-dice">-</span></div>
+    </div>
+    <div class="player-panel p-yellow" id="panel-1">
+        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Danny" class="p-avatar">
+        <div class="p-info"><span class="p-name">Danny</span><span class="p-dice">-</span></div>
+    </div>
+    <div class="player-panel p-blue" id="panel-3">
+        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Isabella" class="p-avatar">
+        <div class="p-info"><span class="p-name">Isabella</span><span class="p-dice">-</span></div>
+    </div>
+    <div class="player-panel p-red" id="panel-2">
+        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Calvin" class="p-avatar">
+        <div class="p-info"><span class="p-name">Calvin</span><span class="p-dice">-</span></div>
     </div>
 
-    <!-- Board -->
-    <div class="board-container">
-      <div class="ludo-grid" id="grid"></div>
+    <div class="board-container" id="board"></div>
+
+    <div class="dice-area dice-pos-0" id="diceArea">
+        <div class="dice-cube" id="diceCube">
+            <div class="face face-1 d1"><div class="dot"></div></div>
+            <div class="face face-6 d6">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+            <div class="face face-2 d2"><div class="dot"></div><div class="dot"></div></div>
+            <div class="face face-5 d5">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                <div class="dot"></div><div class="dot"></div>
+            </div>
+            <div class="face face-3 d3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div class="face face-4 d4">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+        </div>
     </div>
 
-    <!-- Dice -->
-    <div class="dice-section">
-      <div class="dice-box" id="diceBox" onclick="rollDice()">
-        <div class="dice-face" id="diceFace">🎲</div>
-        <div class="dice-label" id="diceLabel">Tap or Space to Roll</div>
-      </div>
-    </div>
+    <div class="status-toast" id="statusToast">✨ Premium Ludo Engine Ready!</div>
+</div>
 
-    <!-- Info -->
-    <div class="info-row">
-      <div class="info-card"><div class="l">Rolls</div><div class="v" id="rollCount">0</div></div>
-      <div class="info-card"><div class="l">Target</div><div class="v">🏠 25</div></div>
-      <div class="info-card"><div class="l">Leader</div><div class="v" id="winnerDisplay">-</div></div>
-    </div>
+<!-- Back to Hub Button Area -->
+<div class="hub-btn-container">
+    <button class="hub-button" onclick="goToDashboard()">🏠 Back to Hub</button>
+</div>
 
-    <!-- Buttons -->
-    <div class="btn-row">
-      <button class="btn accent" onclick="restart()">🔄 New Game</button>
-      <button class="btn" onclick="goToDashboard()">🏠 Back to Hub</button>
-    </div>
+<script>
+    // ==================== ENGINE CORE VARIABLES ====================
+    const colors = ['green', 'yellow', 'red', 'blue'];
+    const diceUnicode = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+    let currentTurn = 3; 
+    let isRolling = false;
+    let rolledValue = 0;
+    let hasMoved = true;
 
-    <!-- Log -->
-    <div class="log-box" id="logBox">
-      <div class="log-item"><span class="log-dot you-dot"></span>🎮 Game started! Roll the dice.</div>
-    </div>
-  </div>
+    const safeCells = ["6,1", "8,2", "1,8", "2,6", "13,6", "12,8", "8,13", "6,12"];
 
-  <!-- Overlay -->
-  <div class="overlay" id="overlay">
-    <div class="result-card">
-      <div class="r-emoji" id="rEmoji">🏆</div>
-      <div class="r-title win" id="rTitle">You Win!</div>
-      <div class="r-sub" id="rSub"></div>
-      <button class="r-btn pri" onclick="restart()">🔄 Play Again</button>
-      <button class="r-btn sec" onclick="document.getElementById('overlay').classList.remove('show')">✕ Close</button>
-    </div>
-  </div>
+    const baseHomeCoordinates = {
+        green:  [[2,2], [2,3], [3,2], [3,3]],
+        yellow: [[2,11],[2,12],[3,11],[3,12]],
+        red:    [[11,2],[11,3],[12,2],[12,3]],
+        blue:   [[11,11],[11,12],[12,11],[12,12]]
+    };
 
-  <script>
-    // ====== GAME STATE ======
-    const TOTAL = 25;
-    let youPos = 0, cpuPos = 0;
-    let yourTurn = true;
-    let gameOver = false;
-    let rollCount = 0;
-    let rolling = false;
+    const commonTrack = [
+        [6,0],[6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],
+        [0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],[7,14],
+        [8,14],[8,13],[8,12],[8,11],[8,10],[8,9],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],
+        [14,6],[13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0]
+    ];
 
-    // Ladders & Snakes
-    const ladders = { 4: 14, 9: 19, 13: 22 };
-    const snakes = { 16: 6, 20: 11, 7: 2 };
+    const playerPaths = {
+        green: { start: 1,  end: 51, home: [[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]] },
+        yellow: { start: 14, end: 12, home: [[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]] },
+        blue: { start: 27, end: 25, home: [[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]] },
+        red: { start: 40, end: 38, home: [[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]] }
+    };
 
-    // Path order
-    const path = [0,1,2,3,4,9,8,7,6,5,10,11,12,13,14,19,18,17,16,15,20,21,22,23,24];
+    let pawnsData = [];
 
-    // ====== DOM ======
-    const grid = document.getElementById("grid");
-    const diceFace = document.getElementById("diceFace");
-    const diceLabel = document.getElementById("diceLabel");
-    const diceBox = document.getElementById("diceBox");
-    const posYouEl = document.getElementById("posYou");
-    const posCpuEl = document.getElementById("posCpu");
-    const rollCountEl = document.getElementById("rollCount");
-    const winnerDisplay = document.getElementById("winnerDisplay");
-    const logBox = document.getElementById("logBox");
-    const pYou = document.getElementById("pYou");
-    const pCpu = document.getElementById("pCpu");
-    const overlay = document.getElementById("overlay");
-    const diceEmojis = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+    // ==================== RENDERING LUDO BOARD SCENE ====================
+    const board = document.getElementById('board');
+    for(let r=0; r<15; r++) {
+        for(let c=0; c<15; c++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.dataset.row = r; cell.dataset.col = c;
+            
+            if (r < 6 && c < 6) { cell.classList.add('base-green'); if(r===1&&c===1) cell.id='box-green'; }
+            else if (r < 6 && c > 8) { cell.classList.add('base-yellow'); if(r===1&&c===10) cell.id='box-yellow'; }
+            else if (r > 8 && c < 6) { cell.classList.add('base-red'); if(r===10&&c===1) cell.id='box-red'; }
+            else if (r > 8 && c > 8) { cell.classList.add('base-blue'); if(r===10&&c===10) cell.id='box-blue'; }
+            else if (r >= 6 && r <= 8 && c >= 6 && c <= 8) cell.classList.add('center-cross');
+            else {
+                if (r === 7 && c < 6) cell.classList.add('path-green');
+                else if (c === 7 && r < 6) cell.classList.add('path-yellow');
+                else if (r === 7 && c > 8) cell.classList.add('path-blue');
+                else if (c === 7 && r > 8) cell.classList.add('path-red');
+                else cell.classList.add('path-white');
+            }
 
-    // ====== SOUND ======
-    function playSound(type) {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.connect(g); g.connect(ctx.destination);
-        if (type === 'roll') { o.frequency.value = 600; o.type = 'sine'; g.gain.value = 0.08; o.start(); o.stop(ctx.currentTime + 0.1); }
-        else if (type === 'ladder') { o.frequency.value = 400; o.type = 'triangle'; g.gain.value = 0.1; o.start(); o.frequency.linearRampToValueAtTime(900, ctx.currentTime + 0.3); o.stop(ctx.currentTime + 0.4); }
-        else if (type === 'snake') { o.frequency.value = 500; o.type = 'sawtooth'; g.gain.value = 0.06; o.start(); o.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.3); o.stop(ctx.currentTime + 0.4); }
-        else if (type === 'win') { o.frequency.value = 500; o.type = 'triangle'; g.gain.value = 0.12; o.start(); o.frequency.linearRampToValueAtTime(1200, ctx.currentTime + 0.5); o.stop(ctx.currentTime + 0.6); }
-        else if (type === 'lose') { o.frequency.value = 400; o.type = 'sawtooth'; g.gain.value = 0.08; o.start(); o.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.5); o.stop(ctx.currentTime + 0.6); }
-      } catch(e) {}
-    }
-
-    // ====== RENDER ======
-    function renderBoard() {
-      grid.innerHTML = "";
-      for (let i = 0; i < TOTAL; i++) {
-        const cell = document.createElement("div");
-        cell.className = "ludo-cell";
-        cell.textContent = path[i] + 1;
-
-        if (i === 0 || i === 24) { cell.classList.add("home"); cell.textContent = i === 0 ? "🏁" : "🏠"; }
-        if (ladders[i]) cell.style.background = "rgba(0,230,118,0.1)";
-        if (snakes[i]) cell.style.background = "rgba(255,59,59,0.1)";
-
-        if (i === youPos && i === cpuPos) {
-          cell.innerHTML = '<span class="token blue-t" style="top:2px;left:2px;">Y</span><span class="token red-t" style="bottom:2px;right:2px;">C</span>';
-        } else if (i === youPos) {
-          cell.innerHTML = '<span class="token blue-t">Y</span>';
-        } else if (i === cpuPos) {
-          cell.innerHTML = '<span class="token red-t">C</span>';
+            if(safeCells.includes(`${r},${c}`)) cell.classList.add('star');
+            board.appendChild(cell);
         }
-        grid.appendChild(cell);
-      }
-      posYouEl.textContent = youPos + 1;
-      posCpuEl.textContent = cpuPos + 1;
-      pYou.classList.toggle("active", yourTurn && !gameOver);
-      pCpu.classList.toggle("active", !yourTurn && !gameOver);
-
-      // Leader
-      if (youPos > cpuPos) { winnerDisplay.textContent = "🔵 You"; winnerDisplay.style.color = "var(--cyan)"; }
-      else if (cpuPos > youPos) { winnerDisplay.textContent = "🔴 CPU"; winnerDisplay.style.color = "var(--red)"; }
-      else { winnerDisplay.textContent = "🤝 Tie"; winnerDisplay.style.color = "#888"; }
     }
 
-    // ====== ROLL ======
-    function rollDice() {
-      if (!yourTurn || gameOver || rolling) return;
-      rolling = true;
-      diceBox.classList.add("rolling");
-      playSound('roll');
-
-      const dice = Math.floor(Math.random() * 6) + 1;
-      rollCount++;
-      rollCountEl.textContent = rollCount;
-
-      setTimeout(() => {
-        diceBox.classList.remove("rolling");
-        diceFace.textContent = diceEmojis[dice - 1];
-        diceLabel.textContent = `You rolled: ${dice}`;
-        addLog(`🎯 You rolled <b>${dice}</b>`, "you");
-        movePlayer("you", dice);
-        rolling = false;
-      }, 500);
-    }
-
-    // ====== MOVE ======
-    function movePlayer(who, steps) {
-      let pos = who === "you" ? youPos : cpuPos;
-      let newPos = pos + steps;
-
-      if (newPos >= TOTAL - 1) {
-        newPos = TOTAL - 1;
-        if (who === "you") youPos = newPos; else cpuPos = newPos;
-        renderBoard();
-        endGame(who);
-        return;
-      }
-
-      if (who === "you") youPos = newPos; else cpuPos = newPos;
-      const checkPos = who === "you" ? youPos : cpuPos;
-
-      if (ladders[checkPos]) {
-        renderBoard();
-        setTimeout(() => {
-          if (who === "you") youPos = ladders[checkPos]; else cpuPos = ladders[checkPos];
-          playSound('ladder');
-          addLog(`🪜 ${who === "you" ? "You" : "CPU"} climbed to <b>${ladders[checkPos] + 1}</b>!`, who);
-          renderBoard();
-          afterMove(who);
-        }, 600);
-        return;
-      }
-      if (snakes[checkPos]) {
-        renderBoard();
-        setTimeout(() => {
-          if (who === "you") youPos = snakes[checkPos]; else cpuPos = snakes[checkPos];
-          playSound('snake');
-          addLog(`🐍 ${who === "you" ? "You" : "CPU"} slid to <b>${snakes[checkPos] + 1}</b>!`, who);
-          renderBoard();
-          afterMove(who);
-        }, 600);
-        return;
-      }
-
-      renderBoard();
-      afterMove(who);
-    }
-
-    function afterMove(who) {
-      if (gameOver) return;
-      if (who === "you") {
-        yourTurn = false;
-        diceLabel.textContent = "CPU thinking...";
-        diceBox.classList.add("dice-disabled");
-        renderBoard();
-        setTimeout(cpuTurn, 1200);
-      } else {
-        yourTurn = true;
-        diceLabel.textContent = "Tap or Space to Roll";
-        diceBox.classList.remove("dice-disabled");
-        renderBoard();
-      }
-    }
-
-    // ====== CPU ======
-    function cpuTurn() {
-      if (gameOver) return;
-      const dice = Math.floor(Math.random() * 6) + 1;
-      rollCount++;
-      rollCountEl.textContent = rollCount;
-      diceFace.textContent = diceEmojis[dice - 1];
-      addLog(`🎯 CPU rolled <b>${dice}</b>`, "cpu");
-      movePlayer("cpu", dice);
-    }
-
-    // ====== END ======
-    function endGame(who) {
-      gameOver = true;
-      diceLabel.textContent = "Game Over";
-      diceBox.classList.add("dice-disabled");
-
-      if (who === "you") {
-        playSound('win');
-        winnerDisplay.textContent = "🏆 You!"; winnerDisplay.style.color = "var(--green)";
-        document.getElementById("rEmoji").textContent = "🏆";
-        document.getElementById("rTitle").textContent = "You Win! 🎉";
-        document.getElementById("rTitle").className = "r-title win";
-        document.getElementById("rSub").textContent = `🏠 Reached home in ${rollCount} rolls!`;
-      } else {
-        playSound('lose');
-        winnerDisplay.textContent = "😢 CPU"; winnerDisplay.style.color = "var(--red)";
-        document.getElementById("rEmoji").textContent = "😢";
-        document.getElementById("rTitle").textContent = "CPU Wins!";
-        document.getElementById("rTitle").className = "r-title lose";
-        document.getElementById("rSub").textContent = `CPU reached home in ${rollCount} rolls. Try again!`;
-      }
-      addLog(`🏁 <b>${who === "you" ? "You" : "CPU"} won!</b>`, who);
-      overlay.classList.add("show");
-    }
-
-    // ====== RESTART ======
-    function restart() {
-      youPos = 0; cpuPos = 0; yourTurn = true; gameOver = false;
-      rollCount = 0; rolling = false;
-      diceFace.textContent = "🎲"; diceLabel.textContent = "Tap or Space to Roll";
-      diceBox.classList.remove("dice-disabled");
-      rollCountEl.textContent = "0";
-      winnerDisplay.textContent = "-"; winnerDisplay.style.color = "#fff";
-      overlay.classList.remove("show");
-      logBox.innerHTML = '<div class="log-item"><span class="log-dot you-dot"></span>🎮 New game! Roll the dice.</div>';
-      renderBoard();
-    }
-
-    // ====== LOG ======
-    function addLog(msg, who) {
-      const div = document.createElement("div");
-      div.className = `log-item ${who}`;
-      div.innerHTML = `<span class="log-dot ${who}-dot"></span>${msg}`;
-      logBox.prepend(div);
-      if (logBox.children.length > 20) logBox.lastChild.remove();
-    }
-
-    // ====== KEYBOARD ======
-    document.addEventListener("keydown", e => {
-      if ((e.code === "Space" || e.key === " ") && yourTurn && !gameOver) { e.preventDefault(); rollDice(); }
-      if (e.key === "r" || e.key === "R") restart();
+    ['green','yellow','red','blue'].forEach(col => {
+        const parent = document.getElementById(`box-${col}`);
+        const card = document.createElement('div'); card.className = `inner-base text-${col}`;
+        card.style.color = col==='green'?'#10b981':col==='yellow'?'#f59e0b':col==='red'?'#ef4444':'#3b82f6';
+        for(let i=0;i<4;i++) { const s = document.createElement('div'); s.className='spot'; card.appendChild(s); }
+        parent.appendChild(card);
     });
 
-    function goToDashboard() { window.location.href = 'index.html'; }
+    // ==================== GENERATING & MANAGING PAWNS ====================
+    const pawnLayer = document.createElement('div');
+    pawnLayer.className = 'pawn-container';
+    board.appendChild(pawnLayer);
 
-    // ====== INIT ======
-    renderBoard();
-  </script>
+    function initPawns() {
+        colors.forEach((color, cIdx) => {
+            for(let i=0; i<4; i++) {
+                const pEl = document.createElement('div');
+                pEl.className = `pawn pawn-${color}`;
+                pEl.id = `pawn-${color}-${i}`;
+                pawnLayer.appendChild(pEl);
+
+                let data = { color: color, colorIndex: cIdx, id: i, step: -1, el: pEl };
+                pawnsData.push(data);
+                pEl.addEventListener('click', () => handlePawnInteraction(data));
+            }
+        });
+        repositionAllPawns();
+    }
+
+    function repositionAllPawns() {
+        let positionMap = {};
+        pawnsData.forEach(p => {
+            let coord = getCoords(p);
+            let key = `${coord[0]}-${coord[1]}`;
+            if(!positionMap[key]) positionMap[key] = [];
+            positionMap[key].push(p);
+        });
+
+        for (let key in positionMap) {
+            let plist = positionMap[key];
+            let total = plist.length;
+            plist.forEach((p, idx) => {
+                let coord = getCoords(p);
+                let r = coord[0], c = coord[1];
+                
+                let offsetTop = (r / 15 * 100) + 3.333;
+                let offsetLeft = (c / 15 * 100) + 3.333;
+
+                if (total > 1) { 
+                    let angle = (idx / total) * 2 * Math.PI;
+                    offsetTop += Math.sin(angle) * 1.2;
+                    offsetLeft += Math.cos(angle) * 1.2;
+                }
+                p.el.style.top = `${offsetTop}%`;
+                p.el.style.left = `${offsetLeft}%`;
+            });
+        }
+    }
+
+    function getCoords(pawn) {
+        if(pawn.step === -1) return baseHomeCoordinates[pawn.color][pawn.id];
+        const cfg = playerPaths[pawn.color];
+        if(pawn.step < 51) {
+            let globalIdx = (cfg.start + pawn.step) % 52;
+            return commonTrack[globalIdx];
+        } else { 
+            let homeIdx = pawn.step - 51;
+            return cfg.home[homeIdx];
+        }
+    }
+
+    // ==================== LOGIC AND DICE MOVEMENT ENGINE ====================
+    const diceCube = document.getElementById('diceCube');
+    const diceArea = document.getElementById('diceArea');
+    const statusToast = document.getElementById('statusToast');
+
+    diceArea.addEventListener('click', () => {
+        if (isRolling || !hasMoved) return;
+        triggerDiceSequence();
+    });
+
+    function triggerDiceSequence() {
+        isRolling = true;
+        statusToast.innerText = "🎲 Shaking Dice...";
+        
+        rolledValue = Math.floor(Math.random() * 6) + 1;
+        
+        const baseRotations = [
+            [0,0], [0,90], [-90,0], [90,0], [0,-90], [180,0]
+        ];
+        let extraSpinX = (Math.floor(Math.random() * 3) + 3) * 360;
+        let extraSpinY = (Math.floor(Math.random() * 3) + 3) * 360;
+        let targetAngle = baseRotations[rolledValue - 1];
+
+        diceCube.style.transform = `rotateX(${extraSpinX + targetAngle[0]}deg) rotateY(${extraSpinY + targetAngle[1]}deg)`;
+
+        setTimeout(() => {
+            isRolling = false;
+            hasMoved = false;
+            document.getElementById(`panel-${currentTurn}`).querySelector('.p-dice').innerText = diceUnicode[rolledValue-1];
+            evaluateTurnPossibilities();
+        }, 600);
+    }
+
+    function evaluateTurnPossibilities() {
+        let activeColor = colors[currentTurn];
+        let movablePawns = pawnsData.filter(p => p.color === activeColor && canMovePawn(p, rolledValue));
+
+        if(movablePawns.length === 0) {
+            statusToast.innerText = `⚠️ No legal moves for ${activeColor.toUpperCase()}!`;
+            hasMoved = true; 
+            setTimeout(() => completeTurn(), 1400);
+        } else {
+            statusToast.innerText = `🎯 Select a ${activeColor.toUpperCase()} pawn to advance +${rolledValue}`;
+            movablePawns.forEach(p => p.el.classList.add('pawn-selected'));
+        }
+    }
+
+    function canMovePawn(pawn, steps) {
+        if(pawn.step === -1 && steps === 6) return true;
+        if(pawn.step === -1) return false;
+        if(pawn.step + steps <= 56) return true;
+        return false;
+    }
+
+    function handlePawnInteraction(pawn) {
+        if(isRolling || hasMoved || pawn.colorIndex !== currentTurn) return;
+        if(!pawn.el.classList.contains('pawn-selected')) return;
+
+        pawnsData.forEach(p => p.el.classList.remove('pawn-selected'));
+        executePawnMovement(pawn);
+    }
+
+    function executePawnMovement(pawn) {
+        if(pawn.step === -1 && rolledValue === 6) {
+            pawn.step = 0;
+            statusToast.innerText = `🚀 Left Base!`;
+        } else {
+            pawn.step += rolledValue;
+            statusToast.innerText = `👣 Advancing...`;
+        }
+        
+        repositionAllPawns();
+        
+        setTimeout(() => {
+            checkCombatCapture(pawn);
+            if(pawn.step === 56) {
+                statusToast.innerText = `🎉 Beautiful! Pawn Reached Goal!`;
+            }
+            
+            if(rolledValue === 6) {
+                hasMoved = true; 
+                statusToast.innerText = `🎰 Bonus Roll Earned! Roll Again.`;
+            } else {
+                hasMoved = true; 
+                completeTurn();
+            }
+        }, 450);
+    }
+
+    function checkCombatCapture(movedPawn) {
+        let currentCoord = getCoords(movedPawn);
+        let coordKey = `${currentCoord[0]},${currentCoord[1]}`;
+        
+        if(safeCells.includes(coordKey) || movedPawn.step === 56) return; 
+
+        pawnsData.forEach(enemy => {
+            if(enemy.color !== movedPawn.color && enemy.step !== -1) {
+                let enemyCoord = getCoords(enemy);
+                if(enemyCoord[0] === currentCoord[0] && enemyCoord[1] === currentCoord[1]) {
+                    enemy.step = -1; 
+                    statusToast.innerText = `⚔️ Captured Enemy ${enemy.color.toUpperCase()} Pawn!`;
+                    repositionAllPawns();
+                }
+            }
+        });
+    }
+
+    function completeTurn() {
+        document.querySelectorAll('.player-panel').forEach(p => p.classList.remove('active'));
+        currentTurn = (currentTurn + 1) % 4;
+        document.getElementById(`panel-${currentTurn}`).classList.add('active');
+        diceArea.className = `dice-area dice-pos-${currentTurn}`;
+        statusToast.innerText = `🎲 ${colors[currentTurn].toUpperCase()}'s turn. Click Dice.`;
+    }
+
+    function goToDashboard() {
+        window.location.href = 'login.html';
+    }
+
+    // Initialize Game
+    initPawns();
+    completeTurn();
+</script>
 </body>
 </html>
